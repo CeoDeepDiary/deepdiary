@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepDiary — Free AI Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --border: #262626;
+  --text: #f5f5f5;
+  --muted: #666;
+  --muted2: #444;
+  --ai-bg: #1a1a1a;
+  --night: 0;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  transition: background 1s ease;
+}
+body.night-mode { --bg: #050508; --surface: #0d0d12; --border: #1a1a24; }
+body.night-mode { background: #050508; }
+
+/* ===================== LANDING ===================== */
+#landing {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  background: #0d0d0d;
+  position: relative; overflow: hidden;
+}
+#landing::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, #1a1a1a 0%, transparent 60%);
+  pointer-events: none;
+}
+.landing-nav {
+  padding: 20px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.landing-logo { font-size: 18px; font-weight: 500; letter-spacing: -0.03em; }
+.landing-logo span { color: var(--muted); font-weight: 300; }
+.landing-nav-right { display: flex; gap: 8px; }
+.btn-ghost {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: inherit; font-size: 13px; padding: 8px 18px;
+  border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+.btn-primary {
+  background: var(--text); color: var(--bg);
+  border: none; font-family: inherit; font-size: 13px; font-weight: 500;
+  padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary:hover { background: #e0e0e0; }
+
+.landing-hero {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 24px;
+  position: relative; z-index: 1;
+}
+.hero-badge {
+  border: 1px solid var(--border); color: var(--muted);
+  font-size: 11px; padding: 5px 14px; border-radius: 20px;
+  letter-spacing: 0.08em; margin-bottom: 32px; display: inline-block;
+}
+.hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(36px, 7vw, 64px);
+  line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--text); margin-bottom: 20px;
+}
+.hero-title em { font-style: italic; color: var(--muted); }
+.hero-sub {
+  font-size: clamp(14px, 2vw, 17px); color: var(--muted);
+  font-weight: 300; max-width: 480px; line-height: 1.65;
+  margin-bottom: 40px;
+}
+.hero-cta { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
+.btn-hero {
+  background: var(--text); color: var(--bg);
+  border: none; font-family: inherit; font-size: 15px; font-weight: 500;
+  padding: 14px 32px; border-radius: 24px; cursor: pointer;
+  transition: all 0.2s; letter-spacing: -0.01em;
+}
+.btn-hero:hover { background: #e8e8e8; transform: translateY(-1px); }
+.btn-hero-ghost {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: inherit; font-size: 15px; padding: 14px 28px;
+  border-radius: 24px; cursor: pointer; transition: all 0.2s;
+}
+.btn-hero-ghost:hover { border-color: var(--muted); color: var(--text); }
+.hero-note { font-size: 12px; color: var(--muted2); letter-spacing: 0.05em; }
+
+.features-row {
+  display: flex; gap: 1px; flex-wrap: wrap; justify-content: center;
+  padding: 0 24px 60px; position: relative; z-index: 1;
+}
+.feat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px 22px; min-width: 180px; flex: 1; max-width: 240px;
+  margin: 1px;
+}
+.feat-icon { font-size: 20px; margin-bottom: 10px; }
+.feat-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.feat-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.landing-footer {
+  padding: 20px 32px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.footer-copy { font-size: 12px; color: var(--muted2); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a {
+  font-size: 12px; color: var(--muted2); text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--muted); }
+
+/* ===================== AUTH ===================== */
+#auth-screen {
+  min-height: 100vh; display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; position: relative; overflow: hidden;
+}
+#auth-screen::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 0%, #1e1e1e 0%, transparent 70%);
+  pointer-events: none;
+}
+.auth-logo { font-size: 24px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 6px; }
+.auth-logo span { color: var(--muted); font-weight: 300; }
+.auth-tagline { font-size: 13px; color: var(--muted); font-weight: 300; margin-bottom: 40px; text-align: center; }
+.auth-box {
+  width: 100%; max-width: 360px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px;
+  position: relative; z-index: 1;
+}
+.auth-tabs { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; margin-bottom: 24px; }
+.auth-tab {
+  flex: 1; background: none; border: none; font-family: inherit;
+  font-size: 14px; color: var(--muted); padding: 8px; border-radius: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+.auth-tab.active { background: var(--surface); color: var(--text); font-weight: 500; border: 1px solid var(--border); }
+.auth-field { margin-bottom: 14px; }
+.auth-label { display: block; font-size: 12px; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+.auth-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: inherit;
+  font-size: 15px; font-weight: 300; padding: 11px 14px; outline: none; transition: border-color 0.15s;
+}
+.auth-input:focus { border-color: #444; }
+.auth-input::placeholder { color: var(--muted2); }
+.auth-btn {
+  width: 100%; background: var(--text); color: var(--bg);
+  border: none; font-family: inherit; font-size: 15px; font-weight: 500;
+  padding: 13px; border-radius: 10px; cursor: pointer; transition: all 0.15s; margin-top: 8px;
+}
+.auth-btn:hover { background: #e0e0e0; }
+.auth-error { font-size: 12px; color: #e05555; margin-top: 10px; text-align: center; min-height: 18px; }
+.auth-footer { margin-top: 28px; text-align: center; display: flex; flex-direction: column; gap: 6px; }
+.auth-footer a { color: var(--muted); font-size: 13px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; transition: color 0.15s; }
+.auth-footer a:hover { color: var(--text); }
+.auth-divider { width: 40px; height: 1px; background: var(--border); margin: 6px auto; }
+.auth-note { font-size: 11px; color: var(--muted2); text-align: center; margin-top: 14px; line-height: 1.5; }
+.back-to-landing { background: none; border: none; color: var(--muted2); font-family: inherit; font-size: 12px; cursor: pointer; margin-bottom: 24px; letter-spacing: 0.05em; }
+.back-to-landing:hover { color: var(--muted); }
+
+/* ===================== APP ===================== */
+#main-app { display: none; }
+.app { max-width: 620px; margin: 0 auto; }
+
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,13,0.92); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px; height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+body.night-mode nav { background: rgba(5,5,8,0.95); }
+.nav-logo { font-size: 17px; font-weight: 500; letter-spacing: -0.02em; }
+.nav-logo span { color: var(--muted); font-weight: 300; }
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab {
+  background: none; border: none; color: var(--muted);
+  font-family: inherit; font-size: 14px; font-weight: 400;
+  padding: 6px 12px; border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.nav-tab.active { background: var(--text); color: var(--bg); font-weight: 500; }
+.nav-right { display: flex; gap: 8px; align-items: center; }
+#nav-username { font-size: 13px; color: var(--muted); font-weight: 300; }
+.icon-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  cursor: pointer; padding: 5px 12px; border-radius: 8px;
+  font-family: inherit; font-size: 12px; transition: all 0.15s;
+}
+.icon-btn:hover { color: var(--text); border-color: var(--muted); }
+
+/* STREAK BAR */
+.streak-bar {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.streak-left { display: flex; align-items: center; gap: 8px; }
+.streak-fire { font-size: 18px; }
+.streak-count { font-size: 20px; font-weight: 500; letter-spacing: -0.03em; }
+.streak-label { font-size: 12px; color: var(--muted); }
+.streak-right { font-size: 11px; color: var(--muted2); letter-spacing: 0.05em; }
+.streak-dots { display: flex; gap: 4px; margin-top: 2px; }
+.streak-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.streak-dot.done { background: var(--text); }
+.streak-dot.today { background: var(--text); box-shadow: 0 0 6px rgba(245,245,245,0.4); }
+
+/* DAILY QUESTION */
+.daily-q {
+  margin: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 16px;
+  cursor: pointer; transition: all 0.2s;
+}
+.daily-q:hover { border-color: var(--muted2); }
+.daily-q-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted2); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.daily-q-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text); }
+.daily-q-text { font-size: 14px; color: var(--text); font-weight: 300; line-height: 1.5; }
+.daily-q-hint { font-size: 11px; color: var(--muted2); margin-top: 6px; }
+
+/* NIGHT BANNER */
+.night-banner {
+  margin: 10px 16px;
+  background: #0a0a12; border: 1px solid #1a1a2e;
+  border-radius: 12px; padding: 12px 16px;
+  display: none; align-items: center; gap: 10px;
+}
+.night-banner.visible { display: flex; }
+.night-text { font-size: 13px; color: #8888aa; font-weight: 300; }
+.night-text strong { color: #aaaacc; font-weight: 400; }
+
+/* COMPOSE */
+.compose {
+  padding: 16px; border-bottom: 1px solid var(--border);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; color: var(--muted); user-select: none;
+}
+.compose-right { flex: 1; min-width: 0; }
+.compose-input {
+  width: 100%; background: none; border: none; outline: none;
+  color: var(--text); font-family: inherit; font-size: 15px;
+  font-weight: 300; line-height: 1.5; resize: none;
+  min-height: 24px; max-height: 200px; overflow-y: auto;
+  transition: font-size 0.5s;
+}
+body.night-mode .compose-input { font-size: 17px; }
+.compose-input::placeholder { color: var(--muted2); }
+.compose-toolbar { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none; flex-direction: column; gap: 10px; }
+.compose-toolbar.visible { opacity: 1; pointer-events: all; }
+.toolbar-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.mood-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.mood-pill {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: inherit; font-size: 12px; padding: 4px 10px;
+  border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.mood-pill:hover { border-color: var(--muted); color: var(--text); }
+.mood-pill.active { border-color: var(--text); color: var(--text); background: var(--surface); }
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag-chip {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: inherit; font-size: 12px; padding: 3px 10px;
+  border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.tag-chip.active { border-color: var(--text); color: var(--text); }
+.post-btn {
+  background: var(--text); color: var(--bg);
+  border: none; font-family: inherit; font-size: 14px; font-weight: 500;
+  padding: 8px 18px; border-radius: 20px; cursor: pointer;
+  transition: all 0.15s; flex-shrink: 0; opacity: 0.4;
+}
+.post-btn.ready { opacity: 1; }
+
+/* TIMED JOURNAL */
+.timed-mode {
+  position: fixed; inset: 0; z-index: 500;
+  background: #050508;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px; display: none;
+}
+.timed-mode.active { display: flex; }
+.timed-header { text-align: center; margin-bottom: 32px; }
+.timed-timer {
+  font-family: 'DM Serif Display', serif;
+  font-size: 72px; font-weight: 400; letter-spacing: -0.04em;
+  color: var(--text); line-height: 1; margin-bottom: 8px;
+}
+.timed-timer.warning { color: #cc4444; }
+.timed-label { font-size: 12px; color: var(--muted2); letter-spacing: 0.15em; text-transform: uppercase; }
+.timed-prompt { font-size: 15px; color: var(--muted); font-weight: 300; font-style: italic; max-width: 400px; text-align: center; margin-bottom: 28px; line-height: 1.6; }
+.timed-textarea {
+  width: 100%; max-width: 560px; min-height: 200px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--text); font-family: inherit;
+  font-size: 17px; font-weight: 300; line-height: 1.7;
+  padding: 20px 24px; outline: none; resize: none;
+  transition: border-color 0.2s; flex: 1; max-height: 320px;
+}
+.timed-textarea:focus { border-color: var(--muted2); }
+.timed-hint { font-size: 11px; color: var(--muted2); margin-top: 10px; letter-spacing: 0.08em; }
+.timed-actions { display: flex; gap: 10px; margin-top: 20px; }
+.timed-cancel { background: none; border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 13px; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+.timed-start { background: var(--text); color: var(--bg); border: none; font-family: inherit; font-size: 14px; font-weight: 500; padding: 10px 24px; border-radius: 20px; cursor: pointer; }
+.timed-intro { text-align: center; }
+.timed-intro h2 { font-family: 'DM Serif Display', serif; font-size: 28px; font-style: italic; color: var(--text); margin-bottom: 12px; }
+.timed-intro p { font-size: 14px; color: var(--muted); font-weight: 300; line-height: 1.6; max-width: 360px; margin: 0 auto 28px; }
+
+/* FILTER BAR */
+.filter-bar { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-pill { background: none; border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 12px; padding: 4px 12px; border-radius: 20px; cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; }
+.filter-pill.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
+
+/* FEED */
+.feed { padding-bottom: 100px; }
+.entry { padding: 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.entry-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; }
+.entry-line { position: absolute; bottom: -100%; left: 50%; transform: translateX(-50%); width: 1px; background: var(--border); height: 100%; }
+.entry-body { flex: 1; min-width: 0; }
+.entry-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.entry-name { font-size: 14px; font-weight: 500; }
+.entry-time { font-size: 12px; color: var(--muted); }
+.entry-mood-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); margin-left: auto; }
+.entry-night-badge { font-size: 10px; color: #5555aa; letter-spacing: 0.05em; }
+.entry-timed-badge { font-size: 10px; color: var(--muted2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 10px; }
+.entry-text { font-size: 15px; font-weight: 300; line-height: 1.6; color: var(--text); margin-bottom: 10px; white-space: pre-wrap; }
+.entry-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.entry-tag { font-size: 12px; color: var(--muted); }
+.entry-actions { display: flex; gap: 16px; align-items: center; }
+.action-btn { background: none; border: none; color: var(--muted); font-family: inherit; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: color 0.15s; padding: 0; }
+.action-btn:hover { color: var(--text); }
+.action-btn svg { width: 16px; height: 16px; }
+
+/* AI BUBBLE */
+.ai-bubble { margin-top: 10px; background: var(--ai-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 13px; line-height: 1.6; color: #aaa; position: relative; animation: fadeIn 0.4s ease; }
+body.night-mode .ai-bubble { background: #0d0d18; border-color: #1e1e32; color: #9999bb; }
+.ai-bubble::before { content: ''; position: absolute; top: -1px; left: 20px; width: 8px; height: 8px; background: var(--ai-bg); border-top: 1px solid var(--border); border-left: 1px solid var(--border); transform: translateY(-50%) rotate(45deg); }
+.ai-label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+.ai-dot { width: 5px; height: 5px; border-radius: 50%; background: #555; display: inline-block; }
+.ai-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.ai-typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite; }
+.ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* STATS BAR */
+.stats-bar { padding: 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; }
+.stat-card { flex-shrink: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; min-width: 110px; }
+.stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.stat-val { font-size: 24px; font-weight: 500; letter-spacing: -0.03em; }
+.stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* AI PANEL */
+.ai-panel { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13,13,13,0.97); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 16px; max-width: 620px; margin: 0 auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 200; }
+.ai-panel.open { transform: translateY(0); }
+.ai-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.ai-panel-title { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.ai-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; }
+.ai-options { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-option { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 13px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: all 0.15s; text-align: left; }
+.ai-option:hover { border-color: var(--muted); }
+
+/* EMPTY STATE */
+.empty { padding: 60px 16px; text-align: center; color: var(--muted); }
+.empty-icon { font-size: 32px; margin-bottom: 12px; }
+.empty p { font-size: 14px; font-weight: 300; }
+
+/* FAB - Timed mode button */
+.fab {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--text); color: var(--bg);
+  border: none; border-radius: 28px; padding: 12px 20px;
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: all 0.2s;
+  z-index: 100;
+}
+.fab:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.6); }
+</style>
+</head>
+<body>
+
+<!-- ==================== LANDING ==================== -->
+<div id="landing">
+  <div class="landing-nav">
+    <div class="landing-logo">deep<span>diary</span></div>
+    <div class="landing-nav-right">
+      <button class="btn-ghost" onclick="showAuth('login')">Sign in</button>
+      <button class="btn-primary" onclick="showAuth('register')">Start free</button>
+    </div>
+  </div>
+
+  <div class="landing-hero">
+    <div class="hero-badge">✦ Free AI Journal — No credit card needed</div>
+    <h1 class="hero-title">Write it down.<br><em>AI helps you understand it.</em></h1>
+    <p class="hero-sub">DeepDiary is your private AI-powered journal. Write freely, track your mood, find patterns — and actually understand yourself.</p>
+    <div class="hero-cta">
+      <button class="btn-hero" onclick="showAuth('register')">Start journaling free →</button>
+      <button class="btn-hero-ghost" onclick="showAuth('login')">I have an account</button>
+    </div>
+    <div class="hero-note">Free forever · No ads · Your data stays private</div>
+  </div>
+
+  <div class="features-row">
+    <div class="feat-card">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">AI Analysis</div>
+      <div class="feat-desc">AI reads your entries and reflects back what's really going on</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔥</div>
+      <div class="feat-title">Streak Counter</div>
+      <div class="feat-desc">Build a daily habit and track how many days in a row you've written</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎯</div>
+      <div class="feat-title">Daily Question</div>
+      <div class="feat-desc">Every day a new AI question to spark your writing</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⏱️</div>
+      <div class="feat-title">5-Min Sprint</div>
+      <div class="feat-desc">Write for 5 minutes non-stop. AI analyzes your stream of consciousness</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌙</div>
+      <div class="feat-title">Night Mode</div>
+      <div class="feat-desc">After 10PM the app transforms — calmer, quieter, softer AI responses</div>
+    </div>
+  </div>
+
+  <div class="landing-footer">
+    <div class="footer-copy">© 2025 DeepDiary · Free forever</div>
+    <div class="footer-links">
+      <a href="https://instagram.com/deepdiaryai" target="_blank">Instagram</a>
+      <a href="mailto:hello@deepdiary.app">Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== AUTH ==================== -->
+<div id="auth-screen">
+  <button class="back-to-landing" onclick="showLanding()">← Back</button>
+  <div class="auth-logo">deep<span>diary</span></div>
+  <div class="auth-tagline">Your thoughts deserve a better home.</div>
+
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login',this)">Sign in</button>
+      <button class="auth-tab" onclick="switchAuthTab('register',this)">Register</button>
+    </div>
+    <div id="login-form">
+      <div class="auth-field"><label class="auth-label">Username</label><input class="auth-input" id="login-username" type="text" placeholder="@your_handle" autocomplete="username"></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input class="auth-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="auth-btn" onclick="doLogin()">Sign in</button>
+      <div class="auth-error" id="login-error"></div>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="auth-field"><label class="auth-label">Your name</label><input class="auth-input" id="reg-name" type="text" placeholder="What should we call you?"></div>
+      <div class="auth-field"><label class="auth-label">Username</label><input class="auth-input" id="reg-username" type="text" placeholder="@your_handle"></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input class="auth-input" id="reg-password" type="password" placeholder="Min. 6 characters" autocomplete="new-password"></div>
+      <button class="auth-btn" onclick="doRegister()">Create free account</button>
+      <div class="auth-error" id="reg-error"></div>
+    </div>
+  </div>
+
+  <div class="auth-footer">
+    <div class="auth-divider"></div>
+    <a href="https://instagram.com/deepdiaryai" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      @deepdiaryai
+    </a>
+    <a href="mailto:hello@deepdiary.app">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 4 10 9 10-9"/></svg>
+      hello@deepdiary.app
+    </a>
+  </div>
+  <div class="auth-note">Free forever · No credit card · No ads</div>
+</div>
+
+<!-- ==================== MAIN APP ==================== -->
+<div id="main-app">
+<div class="app">
+  <nav>
+    <div class="nav-logo">deep<span>diary</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('feed',this)">Feed</button>
+      <button class="nav-tab" onclick="switchTab('insights',this)">AI Insights</button>
+    </div>
+    <div class="nav-right">
+      <span id="nav-username"></span>
+      <button class="icon-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- FEED TAB -->
+  <div id="tab-feed">
+
+    <!-- STREAK BAR -->
+    <div class="streak-bar" id="streak-bar">
+      <div class="streak-left">
+        <div class="streak-fire">🔥</div>
+        <div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div class="streak-count" id="streak-count">0</div>
+            <div class="streak-label">day streak</div>
+          </div>
+          <div class="streak-dots" id="streak-dots"></div>
+        </div>
+      </div>
+      <div class="streak-right" id="streak-msg">Write today to start your streak</div>
+    </div>
+
+    <!-- NIGHT BANNER -->
+    <div class="night-banner" id="night-banner">
+      <span>🌙</span>
+      <div class="night-text"><strong>Night mode on.</strong> Write freely — this is your quiet time.</div>
+    </div>
+
+    <!-- DAILY QUESTION -->
+    <div class="daily-q" id="daily-q" onclick="useDailyQ()">
+      <div class="daily-q-label"><div class="daily-q-dot"></div>Today's question</div>
+      <div class="daily-q-text" id="daily-q-text">Loading...</div>
+      <div class="daily-q-hint">Tap to use as your journal prompt →</div>
+    </div>
+
+    <!-- COMPOSE -->
+    <div class="compose">
+      <div class="avatar" id="compose-avatar">me</div>
+      <div class="compose-right">
+        <textarea class="compose-input" id="compose" placeholder="What's on your mind..." rows="1" oninput="onCompose(this)" onkeydown="handleKey(event)"></textarea>
+        <div class="compose-toolbar" id="compose-toolbar">
+          <div class="mood-pills" id="mood-pills"></div>
+          <div class="tag-row" id="tag-row"></div>
+          <div class="toolbar-row">
+            <span style="font-size:11px;color:var(--muted2)">Cmd+Enter to post</span>
+            <button class="post-btn" id="post-btn" onclick="postEntry()">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-bar" id="filter-bar"></div>
+
+    <!-- FEED -->
+    <div class="feed" id="feed"></div>
+  </div>
+
+  <!-- INSIGHTS TAB -->
+  <div id="tab-insights" style="display:none">
+    <div class="stats-bar" id="stats-bar"></div>
+    <div style="padding:16px">
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:16px;text-transform:uppercase;letter-spacing:0.1em">✦ AI Weekly Analysis</div>
+      <div id="insights-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB: 5-min sprint -->
+<button class="fab" onclick="openTimed()">⏱️ 5-min sprint</button>
+
+<!-- AI PANEL -->
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <span class="ai-panel-title">✦ AI Assistant</span>
+    <button class="ai-close" onclick="closeAI()">×</button>
+  </div>
+  <div class="ai-options" id="ai-options"></div>
+</div>
+</div>
+
+<!-- TIMED MODE -->
+<div class="timed-mode" id="timed-mode">
+  <div id="timed-intro-screen" class="timed-intro">
+    <h2>5-Minute Sprint</h2>
+    <p>Write non-stop for 5 minutes. Don't think, don't edit — just write. AI will analyze your stream of consciousness when time's up.</p>
+    <div class="timed-actions">
+      <button class="timed-cancel" onclick="closeTimed()">Cancel</button>
+      <button class="timed-start" onclick="startTimed()">Start writing →</button>
+    </div>
+  </div>
+  <div id="timed-writing-screen" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:560px">
+    <div class="timed-header">
+      <div class="timed-timer" id="timed-timer">5:00</div>
+      <div class="timed-label">keep writing — don't stop</div>
+    </div>
+    <textarea class="timed-textarea" id="timed-text" placeholder="Just start writing anything..."></textarea>
+    <div class="timed-hint">Don't edit. Don't delete. Just write.</div>
+    <div class="timed-actions" style="margin-top:14px">
+      <button class="timed-cancel" onclick="closeTimed()">Cancel</button>
+    </div>
+  </div>
+  <div id="timed-result-screen" style="display:none;flex-direction:column;align-items:center;width:100%;max-width:560px;text-align:center">
+    <div style="font-size:32px;margin-bottom:16px">✦</div>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:24px;font-style:italic;margin-bottom:8px;color:var(--text)">Time's up.</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:24px">AI is reading your sprint...</p>
+    <div class="ai-bubble" id="timed-ai-result" style="width:100%;text-align:left">
+      <div class="ai-label"><span class="ai-dot"></span>AI</div>
+      <div class="ai-typing"><span></span><span></span><span></span></div>
+    </div>
+    <div class="timed-actions" style="margin-top:20px">
+      <button class="timed-cancel" onclick="closeTimed()">Close</button>
+      <button class="timed-start" onclick="saveTimed()">Save to journal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const MOODS = [
+  {emoji:"🔥",label:"Motivated"},{emoji:"😤",label:"Tired"},
+  {emoji:"😟",label:"Anxious"},{emoji:"😌",label:"Calm"},
+  {emoji:"💪",label:"Strong"},{emoji:"😠",label:"Frustrated"},
+];
+const TAGS = ["Goals","Work","Ideas","Finance","Progress","Personal","Emotions","Plans"];
+
+const DAILY_QUESTIONS = [
+  "What's one thing draining your energy right now — and what would happen if you let it go?",
+  "If today were perfect, what would that look like?",
+  "What are you avoiding, and why?",
+  "What's something you know you should do but keep postponing?",
+  "What made you smile this week, even briefly?",
+  "What would you tell yourself from 6 months ago?",
+  "What does success feel like to you right now — not what it looks like, how it feels?",
+  "What's one belief about yourself that might not be true?",
+  "What are you most proud of this month, even if it's small?",
+  "If you had no fear, what would you start tomorrow?",
+  "What conversation are you afraid to have?",
+  "Where in your life are you playing it too safe?",
+  "What does rest mean to you, and when did you last truly rest?",
+  "What would you do differently if no one was watching?",
+  "What's one small win you haven't given yourself credit for?",
+];
+
+const NIGHT_PROMPTS = [
+  "The night is quiet. What's your mind still carrying?",
+  "Late night thoughts are often the most honest ones. Go ahead.",
+  "It's late. What are you really thinking about?",
+  "Before you sleep — what needs to be said?",
+];
+
+let entries = [];
+let selectedMood = null;
+let selectedTags = [];
+let activeFilter = null;
+let currentAIEntry = null;
+let currentUser = null;
+let timedInterval = null;
+let timedSeconds = 300;
+let timedText = '';
+
+// ============ UTILS ============
+function isNight() {
+  const h = new Date().getHours();
+  return h >= 22 || h < 5;
+}
+function todayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+function save() {
+  if (currentUser) localStorage.setItem('dd_entries_' + currentUser.username, JSON.stringify(entries));
+}
+function getUsers() { return JSON.parse(localStorage.getItem('dd_users') || '{}'); }
+function saveUsers(u) { localStorage.setItem('dd_users', JSON.stringify(u)); }
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+
+// ============ SCREENS ============
+function showLanding() {
+  document.getElementById('landing').style.display = 'flex';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'none';
+}
+function showAuth(tab) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  if (tab === 'register') {
+    document.querySelectorAll('.auth-tab')[1].click();
+  }
+}
+function switchAuthTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+// ============ AUTH ============
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const username = document.getElementById('reg-username').value.trim().replace(/^@/,'').toLowerCase();
+  const password = document.getElementById('reg-password').value;
+  const err = document.getElementById('reg-error');
+  if (!name) { err.textContent = 'Enter your name'; return; }
+  if (username.length < 2) { err.textContent = 'Username too short'; return; }
+  if (password.length < 6) { err.textContent = 'Password min 6 characters'; return; }
+  const users = getUsers();
+  if (users[username]) { err.textContent = 'Username already taken'; return; }
+  users[username] = { name, username, password, joinedAt: new Date().toISOString() };
+  saveUsers(users);
+  loginUser(username, name);
+}
+function doLogin() {
+  const username = document.getElementById('login-username').value.trim().replace(/^@/,'').toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  if (!username) { err.textContent = 'Enter your username'; return; }
+  const users = getUsers();
+  if (!users[username]) { err.textContent = 'Account not found'; return; }
+  if (users[username].password !== password) { err.textContent = 'Wrong password'; return; }
+  loginUser(username, users[username].name);
+}
+function loginUser(username, name) {
+  currentUser = { username, name };
+  localStorage.setItem('dd_session', JSON.stringify(currentUser));
+  entries = JSON.parse(localStorage.getItem('dd_entries_' + username) || '[]');
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('nav-username').textContent = name;
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('compose-avatar').textContent = initials;
+  initApp();
+}
+function doLogout() {
+  localStorage.removeItem('dd_session');
+  currentUser = null; entries = [];
+  showLanding();
+}
+
+// ============ INIT APP ============
+function initApp() {
+  checkNightMode();
+  renderStreak();
+  renderDailyQuestion();
+  buildCompose();
+  renderFeed();
+  setInterval(checkNightMode, 60000);
+}
+
+// ============ NIGHT MODE ============
+function checkNightMode() {
+  const night = isNight();
+  document.body.classList.toggle('night-mode', night);
+  const banner = document.getElementById('night-banner');
+  if (banner) banner.classList.toggle('visible', night);
+  const placeholder = document.getElementById('compose');
+  if (placeholder) {
+    placeholder.placeholder = night
+      ? "The night is quiet. What's on your mind..."
+      : "What's on your mind...";
+  }
+}
+
+// ============ STREAK ============
+function renderStreak() {
+  const streak = calcStreak();
+  document.getElementById('streak-count').textContent = streak;
+  const msg = document.getElementById('streak-msg');
+  if (streak === 0) msg.textContent = 'Write today to start your streak';
+  else if (streak === 1) msg.textContent = 'Great start! Come back tomorrow 💪';
+  else if (streak < 7) msg.textContent = `${streak} days — keep going!`;
+  else msg.textContent = `${streak} days — you're on fire! 🔥`;
+
+  // dots for last 7 days
+  const dots = document.getElementById('streak-dots');
+  dots.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const hasEntry = entries.some(e => e.createdAt.startsWith(key));
+    const isToday = i === 0;
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (hasEntry ? (isToday ? ' today' : ' done') : '');
+    dots.appendChild(dot);
+  }
+}
+
+function calcStreak() {
+  if (!entries.length) return 0;
+  let streak = 0;
+  let check = new Date();
+  check.setHours(0,0,0,0);
+  for (let i = 0; i < 365; i++) {
+    const key = check.toISOString().split('T')[0];
+    const hasEntry = entries.some(e => e.createdAt.startsWith(key));
+    if (hasEntry) { streak++; check.setDate(check.getDate() - 1); }
+    else if (i === 0) { check.setDate(check.getDate() - 1); }
+    else break;
+  }
+  return streak;
+}
+
+// ============ DAILY QUESTION ============
+function renderDailyQuestion() {
+  const dayIndex = Math.floor(Date.now() / 86400000) % DAILY_QUESTIONS.length;
+  const q = isNight()
+    ? NIGHT_PROMPTS[Math.floor(Date.now() / 86400000) % NIGHT_PROMPTS.length]
+    : DAILY_QUESTIONS[dayIndex];
+  document.getElementById('daily-q-text').textContent = q;
+}
+
+function useDailyQ() {
+  const q = document.getElementById('daily-q-text').textContent;
+  const compose = document.getElementById('compose');
+  compose.value = q + '\n\n';
+  compose.style.height = 'auto';
+  compose.style.height = compose.scrollHeight + 'px';
+  onCompose(compose);
+  compose.focus();
+  compose.setSelectionRange(compose.value.length, compose.value.length);
+}
+
+// ============ COMPOSE ============
+function buildCompose() {
+  const mp = document.getElementById('mood-pills');
+  mp.innerHTML = '';
+  MOODS.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'mood-pill';
+    b.innerHTML = m.emoji + ' ' + m.label;
+    b.onclick = () => {
+      selectedMood = selectedMood === m.label ? null : m.label;
+      mp.querySelectorAll('.mood-pill').forEach(x => x.classList.remove('active'));
+      if (selectedMood) b.classList.add('active');
+    };
+    mp.appendChild(b);
+  });
+  const tr = document.getElementById('tag-row');
+  tr.innerHTML = '';
+  TAGS.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'tag-chip';
+    b.textContent = '#' + t;
+    b.onclick = () => {
+      if (selectedTags.includes(t)) { selectedTags = selectedTags.filter(x=>x!==t); b.classList.remove('active'); }
+      else { selectedTags.push(t); b.classList.add('active'); }
+    };
+    tr.appendChild(b);
+  });
+}
+
+function onCompose(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+  const toolbar = document.getElementById('compose-toolbar');
+  const btn = document.getElementById('post-btn');
+  const hasText = el.value.trim().length > 0;
+  toolbar.classList.toggle('visible', hasText);
+  btn.classList.toggle('ready', hasText);
+}
+
+function handleKey(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') postEntry();
+}
+
+function postEntry() {
+  const text = document.getElementById('compose').value.trim();
+  if (!text) return;
+  const entry = {
+    id: Date.now().toString(),
+    text, mood: selectedMood, tags: [...selectedTags],
+    createdAt: new Date().toISOString(),
+    isNight: isNight(),
+    aiResponse: null,
+  };
+  entries.unshift(entry);
+  save();
+  // reset
+  const el = document.getElementById('compose');
+  el.value = ''; el.style.height = 'auto';
+  document.getElementById('compose-toolbar').classList.remove('visible');
+  document.getElementById('post-btn').classList.remove('ready');
+  selectedMood = null; selectedTags = [];
+  document.querySelectorAll('.mood-pill,.tag-chip').forEach(b => b.classList.remove('active'));
+  renderStreak();
+  renderFeed();
+}
+
+// ============ FEED ============
+function renderFeed() {
+  renderFilters();
+  const feed = document.getElementById('feed');
+  const filtered = activeFilter ? entries.filter(e => e.tags?.includes(activeFilter) || e.mood === activeFilter) : entries;
+  if (!filtered.length) {
+    feed.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><p>${entries.length ? 'No entries for this filter' : "Your first entry is waiting for you"}</p></div>`;
+    return;
+  }
+  feed.innerHTML = '';
+  filtered.forEach((entry, i) => {
+    const el = document.createElement('div');
+    el.className = 'entry';
+    el.id = 'entry-' + entry.id;
+    const m = entry.mood ? MOODS.find(x => x.label === entry.mood) : null;
+    el.innerHTML = `
+      <div class="entry-avatar">
+        ${m ? m.emoji : document.getElementById('compose-avatar').textContent}
+        ${i < filtered.length - 1 ? '<div class="entry-line"></div>' : ''}
+      </div>
+      <div class="entry-body">
+        <div class="entry-header">
+          <span class="entry-name">${currentUser.name}</span>
+          <span class="entry-time">${timeAgo(entry.createdAt)}</span>
+          ${m ? `<span class="entry-mood-badge">${m.emoji} ${m.label}</span>` : ''}
+          ${entry.isNight ? `<span class="entry-night-badge">🌙 night</span>` : ''}
+          ${entry.isTimed ? `<span class="entry-timed-badge">⏱️ sprint</span>` : ''}
+        </div>
+        <div class="entry-text">${escHtml(entry.text)}</div>
+        ${entry.tags?.length ? `<div class="entry-tags">${entry.tags.map(t=>`<span class="entry-tag">#${t}</span>`).join('')}</div>` : ''}
+        ${entry.aiResponse ? `<div class="ai-bubble"><div class="ai-label"><span class="ai-dot"></span>AI</div>${escHtml(entry.aiResponse)}</div>` : ''}
+        <div class="entry-actions">
+          <button class="action-btn" onclick="openAI('${entry.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            Ask AI
+          </button>
+          <button class="action-btn" onclick="deleteEntry('${entry.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>`;
+    feed.appendChild(el);
+  });
+}
+
+function renderFilters() {
+  const fb = document.getElementById('filter-bar');
+  fb.innerHTML = '';
+  const all = document.createElement('button');
+  all.className = 'filter-pill' + (activeFilter === null ? ' active' : '');
+  all.textContent = 'All';
+  all.onclick = () => { activeFilter = null; renderFeed(); };
+  fb.appendChild(all);
+  [...new Set(entries.flatMap(e => e.tags||[]))].forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'filter-pill' + (activeFilter === t ? ' active' : '');
+    b.textContent = '#' + t;
+    b.onclick = () => { activeFilter = activeFilter===t ? null : t; renderFeed(); };
+    fb.appendChild(b);
+  });
+  [...new Set(entries.map(e=>e.mood).filter(Boolean))].forEach(m => {
+    const mood = MOODS.find(x=>x.label===m);
+    const b = document.createElement('button');
+    b.className = 'filter-pill' + (activeFilter === m ? ' active' : '');
+    b.textContent = mood.emoji + ' ' + m;
+    b.onclick = () => { activeFilter = activeFilter===m ? null : m; renderFeed(); };
+    fb.appendChild(b);
+  });
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  save(); renderStreak(); renderFeed();
+}
+
+// ============ AI PANEL ============
+const AI_OPTIONS = [
+  { icon:'💬', label:'Analyze my mood', prompt: e => {
+    const night = e.isNight ? 'This was written late at night. Be extra gentle and calming.' : '';
+    return `Analyze the emotional state in this journal entry. Be warm, brief (2-3 sentences). ${night}\n\n"${e.text}"`;
+  }},
+  { icon:'🎯', label:'Suggest next step', prompt: e => `Based on this journal entry, suggest ONE concrete action this person can take today (1-2 sentences):\n\n"${e.text}"` },
+  { icon:'✍️', label:'Reframe positively', prompt: e => `Reframe this thought into a more empowering, positive perspective (1-2 sentences):\n\n"${e.text}"` },
+  { icon:'🔍', label:'Find the pattern', prompt: e => `Identify the core theme or pattern in this entry in one insightful sentence:\n\n"${e.text}"` },
+];
+
+function openAI(entryId) {
+  currentAIEntry = entries.find(e => e.id === entryId);
+  const opts = document.getElementById('ai-options');
+  opts.innerHTML = '';
+  AI_OPTIONS.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'ai-option';
+    b.innerHTML = opt.icon + ' ' + opt.label;
+    b.onclick = () => { closeAI(); runAI(opt); };
+    opts.appendChild(b);
+  });
+  document.getElementById('ai-panel').classList.add('open');
+}
+function closeAI() { document.getElementById('ai-panel').classList.remove('open'); }
+
+async function runAI(opt) {
+  const entry = currentAIEntry;
+  if (!entry) return;
+  const entryEl = document.getElementById('entry-' + entry.id);
+  if (!entryEl) return;
+  let bubble = entryEl.querySelector('.ai-bubble');
+  if (!bubble) {
+    bubble = document.createElement('div');
+    bubble.className = 'ai-bubble';
+    entryEl.querySelector('.entry-actions').before(bubble);
+  }
+  bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI</div><div class="ai-typing"><span></span><span></span><span></span></div>`;
+  try {
+    const nightSystem = isNight()
+      ? 'It is late at night. The user is journaling before sleep. Be especially calm, gentle, and brief. Use softer language.'
+      : 'You are a warm personal AI journal assistant. Be concise, human, and insightful.';
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: nightSystem,
+        messages: [{ role: 'user', content: opt.prompt(entry) }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('') || 'Could not get a response.';
+    bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI · ${opt.icon} ${opt.label}</div>${escHtml(text)}`;
+    entry.aiResponse = text; save();
+  } catch {
+    bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI</div>Connection error. Try again.`;
+  }
+}
+
+// ============ INSIGHTS ============
+async function renderInsights() {
+  const total = entries.length;
+  const week = entries.filter(e => (Date.now()-new Date(e.createdAt)) < 7*86400*1000).length;
+  const streak = calcStreak();
+  const moods = entries.map(e=>e.mood).filter(Boolean);
+  const topMood = moods.length ? moods.sort((a,b)=>moods.filter(x=>x===b).length-moods.filter(x=>x===a).length)[0] : null;
+  const topMoodObj = topMood ? MOODS.find(m=>m.label===topMood) : null;
+  const nightEntries = entries.filter(e=>e.isNight).length;
+  const timedEntries = entries.filter(e=>e.isTimed).length;
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val">${total}</div><div class="stat-sub">entries</div></div>
+    <div class="stat-card"><div class="stat-label">This week</div><div class="stat-val">${week}</div><div class="stat-sub">entries</div></div>
+    <div class="stat-card"><div class="stat-label">Streak</div><div class="stat-val">🔥${streak}</div><div class="stat-sub">days</div></div>
+    ${topMoodObj ? `<div class="stat-card"><div class="stat-label">Top mood</div><div class="stat-val">${topMoodObj.emoji}</div><div class="stat-sub">${topMood}</div></div>` : ''}
+    ${nightEntries ? `<div class="stat-card"><div class="stat-label">Night entries</div><div class="stat-val">🌙${nightEntries}</div><div class="stat-sub">late night</div></div>` : ''}
+    ${timedEntries ? `<div class="stat-card"><div class="stat-label">Sprints</div><div class="stat-val">⏱️${timedEntries}</div><div class="stat-sub">completed</div></div>` : ''}
+  `;
+
+  const ic = document.getElementById('insights-content');
+  if (!entries.length) {
+    ic.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><p>Add a few entries to get AI analysis</p></div>`;
+    return;
+  }
+  ic.innerHTML = `<div class="ai-bubble"><div class="ai-label"><span class="ai-dot"></span>AI</div><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  const recent = entries.slice(0,10).map(e=>`[${e.mood||'?'}${e.isNight?' 🌙':''}] ${e.text}`).join('\n---\n');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: 'You are a warm personal AI coach. Analyze journal entries and give deep, useful insights. Be specific and caring.',
+        messages: [{ role: 'user', content: `Analyze these journal entries and give:\n1. Main mood pattern\n2. What this person thinks/worries about most\n3. One growth insight\n4. One specific action for this week\n\nEntries:\n${recent}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('') || 'Error.';
+    ic.innerHTML = `<div class="ai-bubble"><div class="ai-label"><span class="ai-dot"></span>AI Weekly Analysis</div>${escHtml(text)}</div>`;
+  } catch {
+    ic.innerHTML = `<div class="ai-bubble">Connection error.</div>`;
+  }
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-feed').style.display = tab === 'feed' ? 'block' : 'none';
+  document.getElementById('tab-insights').style.display = tab === 'insights' ? 'block' : 'none';
+  if (tab === 'insights') renderInsights();
+}
+
+// ============ TIMED JOURNAL ============
+function openTimed() {
+  document.getElementById('timed-mode').classList.add('active');
+  document.getElementById('timed-intro-screen').style.display = 'block';
+  document.getElementById('timed-writing-screen').style.display = 'none';
+  document.getElementById('timed-result-screen').style.display = 'none';
+}
+function closeTimed() {
+  document.getElementById('timed-mode').classList.remove('active');
+  if (timedInterval) { clearInterval(timedInterval); timedInterval = null; }
+  timedSeconds = 300;
+}
+function startTimed() {
+  document.getElementById('timed-intro-screen').style.display = 'none';
+  document.getElementById('timed-writing-screen').style.display = 'flex';
+  document.getElementById('timed-text').value = '';
+  document.getElementById('timed-text').focus();
+  timedSeconds = 300;
+  updateTimerDisplay();
+  timedInterval = setInterval(() => {
+    timedSeconds--;
+    updateTimerDisplay();
+    if (timedSeconds <= 0) {
+      clearInterval(timedInterval); timedInterval = null;
+      finishTimed();
+    }
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const m = Math.floor(timedSeconds / 60);
+  const s = timedSeconds % 60;
+  const el = document.getElementById('timed-timer');
+  el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  el.classList.toggle('warning', timedSeconds <= 30);
+}
+async function finishTimed() {
+  timedText = document.getElementById('timed-text').value.trim();
+  document.getElementById('timed-writing-screen').style.display = 'none';
+  document.getElementById('timed-result-screen').style.display = 'flex';
+  const bubble = document.getElementById('timed-ai-result');
+  if (!timedText) {
+    bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI</div>Looks like the page was blank — that's okay. Try again when you're ready.`;
+    return;
+  }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: 'You are analyzing a 5-minute free-writing sprint from a personal journal. The person wrote non-stop without editing. Give a warm, insightful analysis: what themes emerged, what emotions are present, and one thing worth reflecting on. Be concise (3-4 sentences).',
+        messages: [{ role: 'user', content: `Analyze this 5-minute free-writing sprint:\n\n"${timedText}"` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c=>c.text||'').join('') || 'Could not analyze.';
+    bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI Sprint Analysis</div>${escHtml(text)}`;
+  } catch {
+    bubble.innerHTML = `<div class="ai-label"><span class="ai-dot"></span>AI</div>Connection error.`;
+  }
+}
+function saveTimed() {
+  if (!timedText) { closeTimed(); return; }
+  const entry = {
+    id: Date.now().toString(),
+    text: timedText,
+    mood: null, tags: [],
+    createdAt: new Date().toISOString(),
+    isNight: isNight(),
+    isTimed: true,
+    aiResponse: null,
+  };
+  entries.unshift(entry);
+  save(); renderStreak(); renderFeed();
+  closeTimed();
+  switchTab('feed', document.querySelector('.nav-tab'));
+}
+
+// ============ BOOT ============
+(function init() {
+  const session = JSON.parse(localStorage.getItem('dd_session') || 'null');
+  if (session && getUsers()[session.username]) {
+    loginUser(session.username, session.name);
+  } else {
+    showLanding();
+  }
+})();
+</script>
+</body>
+</html>
